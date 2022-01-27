@@ -1,0 +1,58 @@
+PCA
+import pandas as pd
+data = pd.read_csv("iris.csv")
+data.head(5)
+data.describe()
+# Output data
+species = data["species"].tolist()
+y = data["species"]
+
+# Input data
+X = data.drop("species", 1)
+
+print(X[:5], "\n")
+print(y[:5])
+from sklearn.preprocessing import StandardScaler
+
+x_scaled = StandardScaler().fit_transform(X)
+x_scaled[:4]
+import numpy as np
+# Covariance Matrix
+features = x_scaled.T
+covMatrix = np.cov(features)
+covMatrix
+# Eigen values and Eigen vector
+values, vectors = np.linalg.eig(covMatrix)
+print(values, "\n")
+print(vectors)
+# Variance of each feature w.r.t eigen vlaues
+explained_variance = []
+for i in range(len(values)):
+  res = values[i]/np.sum(values)*100
+  explained_variance.append(res)
+
+print("Variance of each feature", explained_variance)
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+# Bar graph
+plt.figure(figsize=(8,4))
+plt.bar(range(4), explained_variance, alpha=0.8)
+plt.ylabel("Percentage of explained variance")
+plt.xlabel("Dimensions")
+
+plt.show()
+# Based on the explained variances and the bar graph
+# So we select first 2 features to be Principle Components
+
+pro_1 = x_scaled.dot(vectors.T[0])
+pro_2 = x_scaled.dot(vectors.T[1])
+
+result = pd.DataFrame(pro_1, columns=["PC1"])
+result["PC2"] = pro_2
+result["Y"] = y
+
+result.head(10)
+# Scatter Plot
+sns.FacetGrid(result, hue="Y", height=6).map(plt.scatter, 'PC1', 'PC2').add_legend()
+plt.show()
